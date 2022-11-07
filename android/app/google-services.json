@@ -1,0 +1,82 @@
+{
+  "project_info": {
+    "project_number": "1053647062053",
+    "project_id": "chatapp-de747",
+    "storage_bucket": "chatapp-de747.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1053647062053:android:561b17144d207e5f60abcc",
+        "android_client_info": {
+          "package_name": "com.example.chat_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1053647062053-3q14i3oq1r5rlqh8bi7rt7ibk54hkq7r.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBOxCayUHeJWrKnGg2pvoTsib9CA5wVvdo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1053647062053-3q14i3oq1r5rlqh8bi7rt7ibk54hkq7r.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "1053647062053-v52gct31bpqh97598tm7erkg26sboooc.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "it.thoson.flutterBase"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1053647062053:android:0c4463ec3680bf2260abcc",
+        "android_client_info": {
+          "package_name": "vn.newwave.flutter_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1053647062053-3q14i3oq1r5rlqh8bi7rt7ibk54hkq7r.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBOxCayUHeJWrKnGg2pvoTsib9CA5wVvdo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1053647062053-3q14i3oq1r5rlqh8bi7rt7ibk54hkq7r.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "1053647062053-v52gct31bpqh97598tm7erkg26sboooc.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "it.thoson.flutterBase"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
