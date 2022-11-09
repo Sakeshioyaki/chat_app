@@ -61,9 +61,9 @@ class InputCodeCubit extends Cubit<InputCodeState> {
           lastName: '',
         );
         //update user
+        appCubit.updateUser(myProfile);
 
         if (result.additionalUserInfo!.isNewUser) {
-          appCubit.updateUser(myProfile);
           authRepo.createNewUser(myProfile);
 
           Get.offNamed(RouteConfig.inputName);

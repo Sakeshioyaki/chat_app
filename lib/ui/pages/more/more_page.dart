@@ -75,9 +75,15 @@ class _BuildChillMorePageState extends State<BuildChillMorePage> {
                             width: 50,
                             fit: BoxFit.cover,
                           )
-                        : Image.asset(
-                            AppImages.icAccount,
-                            width: 37,
+                        : Container(
+                            height: 50,
+                            width: 50,
+                            child: Center(
+                              child: Image.asset(
+                                AppImages.icAccount,
+                                width: 37,
+                              ),
+                            ),
                           ),
                   ),
                   const SizedBox(
