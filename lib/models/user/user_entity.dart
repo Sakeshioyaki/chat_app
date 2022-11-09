@@ -6,9 +6,17 @@ class UserEntity {
   String? lastName;
   String? phone;
   String? avatarUrl;
+  bool? isOnline;
+  Timestamp? lastChanged;
 
   UserEntity(
-      {this.id, this.firstName, this.lastName, this.phone, this.avatarUrl});
+      {this.id,
+      this.firstName,
+      this.lastName,
+      this.phone,
+      this.avatarUrl,
+      this.isOnline,
+      this.lastChanged});
 
   UserEntity.fromDocumentSnapshot(
       {required DocumentSnapshot documentSnapshot}) {

@@ -7,10 +7,13 @@ import 'package:chat_app/repositories/user_repository.dart';
 import 'package:chat_app/router/route_config.dart';
 import 'package:chat_app/ui/commons/app_snackbar.dart';
 import 'package:chat_app/utils/logger.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:equatable/equatable.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 
 part 'input_code_state.dart';
 
@@ -65,10 +68,29 @@ class InputCodeCubit extends Cubit<InputCodeState> {
 
         if (result.additionalUserInfo!.isNewUser) {
           authRepo.createNewUser(myProfile);
+          DatabaseReference ref =
+              FirebaseDatabase.instance.ref("status/${result.user?.uid}");
+          print(DateFormat('dd MMM y    h:mm a').format(DateTime.now()));
+
+          var isOnlineForFirestore = {
+            "state": 'online',
+            "last_changed": Timestamp.fromDate(DateTime.now()).toString(),
+          };
+          // isOnlineForFirestore['sate'];
+          await ref.set(isOnlineForFirestore);
 
           Get.offNamed(RouteConfig.inputName);
         } else {
           //user da ton tai can phai lay profile
+
+          DatabaseReference ref =
+              FirebaseDatabase.instance.ref("status/${result.user?.uid}");
+          var isOnlineForFirestore = {
+            "state": 'online',
+            "last_changed": Timestamp.fromDate(DateTime.now()).toString(),
+          };
+          await ref.update(isOnlineForFirestore);
+
           await appCubit.fetchProfile();
           Get.offNamed(RouteConfig.home);
         }

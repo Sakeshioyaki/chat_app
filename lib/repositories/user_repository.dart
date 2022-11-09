@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:chat_app/models/user/user_entity.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:path/path.dart';
 
@@ -9,12 +10,14 @@ abstract class UserRepository {
   Future<UserEntity> getProfile(String uid);
   Future<void> updateProfileUserToFirebase(UserEntity userEntity);
   Future<String> uploadImg(String filePath);
+  Future<List<UserEntity>> getAllUser();
 }
 
 class UserRepositoryImpl extends UserRepository {
   UserRepositoryImpl();
   final FirebaseFirestore db = FirebaseFirestore.instance;
   final storageRef = FirebaseStorage.instance.ref();
+  FirebaseDatabase refRTD = FirebaseDatabase.instance;
 
   @override
   Future<UserEntity> getProfile(String uid) async {
@@ -30,8 +33,8 @@ class UserRepositoryImpl extends UserRepository {
       "last_name": userEntity.lastName,
       "avatar_url": userEntity.avatarUrl,
     }).onError((e, _) => print("Error writing document: $e"));
+
     return;
-    // emit(state.copyWith(user: user));
   }
 
   @override
@@ -54,5 +57,23 @@ class UserRepositoryImpl extends UserRepository {
       print(e);
     }
     return "";
+  }
+
+  @override
+  Future<List<UserEntity>> getAllUser() async {
+    List<UserEntity> allUser = [];
+    try {
+      final listUser = await db.collection("users").get();
+      for (var e in listUser.docs) {
+        allUser.add(UserEntity.fromDocumentSnapshot(documentSnapshot: e));
+        print(
+            'this is value -- ${UserEntity.fromDocumentSnapshot(documentSnapshot: e).phone}');
+      }
+      return allUser;
+    } catch (e) {
+      print("bug when get all user $e");
+      return [];
+      // rethrow;
+    }
   }
 }

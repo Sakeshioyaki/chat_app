@@ -95,7 +95,9 @@ class _BuildChillMorePageState extends State<BuildChillMorePage> {
                       Text(
                         state.user?.lastName == ''
                             ? state.user?.firstName ?? ''
-                            : state.user!.firstName! + state.user!.lastName!,
+                            : state.user!.firstName! +
+                                ' ' +
+                                state.user!.lastName!,
                         style: AppTextStyle.blackS14,
                       ),
                       const SizedBox(height: 5),
