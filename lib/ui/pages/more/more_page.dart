@@ -1,17 +1,46 @@
+import 'package:chat_app/blocs/app_cubit.dart';
 import 'package:chat_app/common/app_images.dart';
 import 'package:chat_app/common/app_text_styles.dart';
 import 'package:chat_app/router/route_config.dart';
+import 'package:chat_app/ui/pages/more/more_cubit.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 
-class MorePage extends StatefulWidget {
+class MorePage extends StatelessWidget {
   const MorePage({Key? key}) : super(key: key);
 
   @override
-  State<MorePage> createState() => _MorePageState();
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (_) {
+        final appCubit = RepositoryProvider.of<AppCubit>(context);
+        return MoreCubit(
+          appCubit: appCubit,
+        );
+      },
+      child: const BuildChillMorePage(),
+    );
+  }
 }
 
-class _MorePageState extends State<MorePage> {
+class BuildChillMorePage extends StatefulWidget {
+  const BuildChillMorePage({Key? key}) : super(key: key);
+  @override
+  State<BuildChillMorePage> createState() => _BuildChillMorePageState();
+}
+
+class _BuildChillMorePageState extends State<BuildChillMorePage> {
+  late MoreCubit cubit;
+  late AppCubit appCubit;
+
+  @override
+  void initState() {
+    cubit = BlocProvider.of<MoreCubit>(context);
+    appCubit = BlocProvider.of<AppCubit>(context);
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -27,48 +56,60 @@ class _MorePageState extends State<MorePage> {
   }
 
   Widget buildProfileUser() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Row(
+    return BlocBuilder<AppCubit, AppState>(
+      bloc: appCubit,
+      builder: (context, state) {
+        return Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(25),
-                child: Image.network(
-                  'https://i.bloganchoi.com/bloganchoi.com/wp-content/uploads/2019/11/dich-le-nhiet-ba-0-696x435.jpg',
-                  height: 50,
-                  width: 50,
-                  fit: BoxFit.cover,
-                ),
-              ),
-              const SizedBox(
-                width: 20,
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              Row(
                 children: [
-                  Text(
-                    'Almayra Zamzamy',
-                    style: AppTextStyle.blackS14,
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(25),
+                    child: state.user?.avatarUrl != ''
+                        ? Image.network(
+                            'https://i.bloganchoi.com/bloganchoi.com/wp-content/uploads/2019/11/dich-le-nhiet-ba-0-696x435.jpg',
+                            height: 50,
+                            width: 50,
+                            fit: BoxFit.cover,
+                          )
+                        : Image.asset(
+                            AppImages.icAccount,
+                            width: 37,
+                          ),
                   ),
-                  const SizedBox(height: 5),
-                  Text(
-                    '+62 1309 - 1710 - 1920',
-                    style: AppTextStyle.greyS14,
-                  )
+                  const SizedBox(
+                    width: 20,
+                  ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        state.user?.lastName == ''
+                            ? state.user?.firstName ?? ''
+                            : state.user!.firstName! + state.user!.lastName!,
+                        style: AppTextStyle.blackS14,
+                      ),
+                      const SizedBox(height: 5),
+                      Text(
+                        state.user?.phone ?? '',
+                        style: AppTextStyle.greyS14,
+                      )
+                    ],
+                  ),
                 ],
+              ),
+              const Icon(
+                Icons.navigate_next,
+                size: 20,
+                color: Colors.black,
               ),
             ],
           ),
-          const Icon(
-            Icons.navigate_next,
-            size: 20,
-            color: Colors.black,
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 

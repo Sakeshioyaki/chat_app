@@ -14,6 +14,7 @@ abstract class AuthRepository {
   Future<void> removeToken();
 
   Future<UserCredential?> signIn(String pin, String verificationId);
+  Future<UserCredential?> loginWithToken(String token);
   Future<bool> createNewUser(UserEntity user);
 }
 
@@ -66,6 +67,29 @@ class AuthRepositoryImpl extends AuthRepository {
     return null;
   }
 
+  @override
+  Future<UserCredential?> loginWithToken(String token) async {
+    try {
+      final userCredential =
+          await FirebaseAuth.instance.signInWithCustomToken(token);
+      print("Sign-in successful.");
+      return userCredential;
+    } on FirebaseAuthException catch (e) {
+      switch (e.code) {
+        case "invalid-custom-token":
+          print("The supplied token is not a Firebase custom auth token.");
+          break;
+        case "custom-token-mismatch":
+          print("The supplied token is for a different Firebase project.");
+          break;
+        default:
+          print("Unkown error.");
+      }
+    }
+    return null;
+  }
+
+  @override
   Future<bool> createNewUser(UserEntity user) async {
     try {
       await _firestore.collection("users").doc(user.id).set({

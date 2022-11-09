@@ -28,18 +28,47 @@ class InputNameCubit extends Cubit<InputNameState> {
     emit(state.copyWith(lastName: name));
   }
 
-  void updateName() {
+  Future<void> updateName() async {
     print('come update name - ${state.lastName} - ${state.firstName}');
     if (state.firstName == "") {
       AppSnackbar.showError(message: 'First name is empty');
       return;
     } else {
       emit(state.copyWith(updateProfile: LoadStatus.loading));
-      appCubit.updateProfile(
-        lastName: state.lastName,
-        firstName: state.firstName ?? '',
-      );
+      if (state.pathImg != "") {
+        print("this is pathimg - ${state.pathImg}");
+        String link = await uploadImage();
+        await appCubit.updateProfile(
+          lastName: state.lastName,
+          firstName: state.firstName ?? '',
+          urlAvatar: link,
+        );
+        print("hoan thanh vs img da upload ${link}");
+      } else {
+        appCubit.updateProfile(
+          lastName: state.lastName,
+          firstName: state.firstName ?? '',
+        );
+      }
+
       Get.offNamed(RouteConfig.home);
     }
+  }
+
+  void setFileUrl(String url) {
+    print('upload img -- avatar - $url');
+    emit(state.copyWith(pathImg: url));
+  }
+
+  Future<String> uploadImage() async {
+    try {
+      String url = await userRepo.uploadImg(state.pathImg ?? "");
+      print("bug ??? $url");
+      return url;
+    } catch (e) {
+      print('bugg khi upload anh');
+    }
+    return "";
+    // update();
   }
 }

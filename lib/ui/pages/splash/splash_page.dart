@@ -1,4 +1,7 @@
+import 'package:chat_app/blocs/app_cubit.dart';
 import 'package:chat_app/common/app_images.dart';
+import 'package:chat_app/repositories/auth_repository.dart';
+import 'package:chat_app/repositories/user_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -11,7 +14,11 @@ class SplashPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) {
-        return SplashCubit();
+        return SplashCubit(
+          authRepo: RepositoryProvider.of<AuthRepository>(context),
+          userRepo: RepositoryProvider.of<UserRepository>(context),
+          appCubit: RepositoryProvider.of<AppCubit>(context),
+        );
       },
       child: const SplashChildPage(),
     );

@@ -61,15 +61,15 @@ class InputCodeCubit extends Cubit<InputCodeState> {
           lastName: '',
         );
         //update user
-        appCubit.updateUser(myProfile);
-        //add user to firebase
-        authRepo.createNewUser(myProfile);
 
         if (result.additionalUserInfo!.isNewUser) {
+          appCubit.updateUser(myProfile);
+          authRepo.createNewUser(myProfile);
+
           Get.offNamed(RouteConfig.inputName);
         } else {
           //user da ton tai can phai lay profile
-          // appCubit.fetchProfile();
+          await appCubit.fetchProfile();
           Get.offNamed(RouteConfig.home);
         }
       } else {

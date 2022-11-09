@@ -17,13 +17,18 @@ class AppCubit extends Cubit<AppState> {
     required this.authRepo,
   }) : super(AppState());
 
-  void fetchProfile() {
-    userRepo.getProfile();
+  Future<void> fetchProfile() async {
+    UserEntity user = await userRepo.getProfile(state.user?.id ?? '');
+    updateUser(user);
     emit(state.copyWith(fetchProfileStatus: LoadStatus.loading));
   }
 
   void updateUser(UserEntity user) {
     emit(state.copyWith(user: user));
+  }
+
+  UserEntity? getUser() {
+    return state.user;
   }
 
   Future<void> updateProfile(
@@ -32,7 +37,7 @@ class AppCubit extends Cubit<AppState> {
       id: state.user?.id,
       phone: state.user?.phone,
       firstName: firstName,
-      lastName: lastName,
+      lastName: lastName ?? state.user?.lastName,
       avatarUrl: urlAvatar ?? state.user?.avatarUrl,
     );
     emit(state.copyWith(user: newUser));
