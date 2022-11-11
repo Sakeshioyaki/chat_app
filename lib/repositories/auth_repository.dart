@@ -46,7 +46,7 @@ class AuthRepositoryImpl extends AuthRepository {
   // }
   @override
   Future<UserCredential?> signIn(String pin, String verificationId) async {
-    print("pin $pin");
+    print("pin $pin - $verificationId");
     final AuthCredential credential = PhoneAuthProvider.credential(
         verificationId: verificationId, smsCode: pin);
     try {
@@ -96,6 +96,7 @@ class AuthRepositoryImpl extends AuthRepository {
         "first_name": user.firstName,
         "last_name": user.lastName,
         "phone": user.phone,
+        "have_story": '',
       });
       print('dang tao userController - va add user vo database - ${user.id}');
       return true;

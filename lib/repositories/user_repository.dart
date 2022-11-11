@@ -22,7 +22,8 @@ class UserRepositoryImpl extends UserRepository {
   @override
   Future<UserEntity> getProfile(String uid) async {
     DocumentSnapshot docRef = await db.collection("users").doc(uid).get();
-    UserEntity user = UserEntity.fromDocumentSnapshot(documentSnapshot: docRef);
+    UserEntity user =
+        UserEntity.fromDocumentSnapshot2(documentSnapshot: docRef);
     return user;
   }
 

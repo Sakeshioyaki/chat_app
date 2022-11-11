@@ -17,7 +17,7 @@ class RouteConfig {
   static const String signIn = "/signIn";
   static const String inputCode = "/inputCode";
   static const String home = "/home";
-  static const String message = "/message";
+  static const String message = "/message/:id&:name";
   static const String inputName = "/InputName";
 
   ///Alias ​​mapping page

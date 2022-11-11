@@ -75,6 +75,7 @@ class InputCodeCubit extends Cubit<InputCodeState> {
           var isOnlineForFirestore = {
             "state": 'online',
             "last_changed": Timestamp.fromDate(DateTime.now()).toString(),
+            "have_story": ''
           };
           // isOnlineForFirestore['sate'];
           await ref.set(isOnlineForFirestore);
@@ -82,16 +83,17 @@ class InputCodeCubit extends Cubit<InputCodeState> {
           Get.offNamed(RouteConfig.inputName);
         } else {
           //user da ton tai can phai lay profile
-
+          await appCubit.fetchProfile();
+          String? story = appCubit.getStory();
           DatabaseReference ref =
               FirebaseDatabase.instance.ref("status/${result.user?.uid}");
           var isOnlineForFirestore = {
             "state": 'online',
             "last_changed": Timestamp.fromDate(DateTime.now()).toString(),
+            "have_story": story,
           };
           await ref.update(isOnlineForFirestore);
 
-          await appCubit.fetchProfile();
           Get.offNamed(RouteConfig.home);
         }
       } else {

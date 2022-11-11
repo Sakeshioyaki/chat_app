@@ -88,23 +88,28 @@ class _ContactsChillPageState extends State<ContactsChillPage> {
     return BlocBuilder<ContactsCubit, ContactsState>(
       builder: (context, state) {
         return Expanded(
-          child: ListView.separated(
-            itemCount: state.allUser?.length ?? 0,
-            itemBuilder: (BuildContext context, int index) {
-              return GestureDetector(
-                onTap: () {
-                  print('see chat');
-                  Get.to(() => MessagePage());
-                },
-                child: buildContactItem(index),
-              );
+          child: RefreshIndicator(
+            onRefresh: () async {
+              cubit.getAllUser();
             },
-            separatorBuilder: (BuildContext context, int index) {
-              return const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 24),
-                child: Divider(),
-              );
-            },
+            child: ListView.separated(
+              itemCount: state.allUser?.length ?? 0,
+              itemBuilder: (BuildContext context, int index) {
+                return GestureDetector(
+                  onTap: () {
+                    print('see chat');
+                    Get.to(() => MessagePage());
+                  },
+                  child: buildContactItem(index),
+                );
+              },
+              separatorBuilder: (BuildContext context, int index) {
+                return const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 24),
+                  child: Divider(),
+                );
+              },
+            ),
           ),
         );
       },
@@ -123,74 +128,108 @@ class _ContactsChillPageState extends State<ContactsChillPage> {
                   SizedBox(
                     height: 56,
                     width: 56,
-                    child: GradientOutline(
-                      strokeWidth: 3,
-                      radius: 18,
-                      gradient: const LinearGradient(
-                        colors: [
-                          AppColors.startGradient,
-                          AppColors.endGradient
-                        ],
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(4.0),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(16),
-                          child: state.allUser?[index].avatarUrl == ''
-                              ? Image.network(
-                                  'https://i.bloganchoi.com/bloganchoi.com/wp-content/uploads/2019/11/dich-le-nhiet-ba-0-696x435.jpg',
-                                  width: 48,
-                                  height: 48,
-                                  fit: BoxFit.cover,
-                                )
-                              : Image.network(
-                                  state.allUser?[index].avatarUrl ?? '',
-                                  width: 48,
-                                  height: 48,
-                                  fit: BoxFit.cover,
-                                ),
-                        ),
-                      ),
-                      onPressed: () {
-                        print('see story');
-                      },
-                    ),
+                    child: state.allUser?[index].haveStory == ''
+                        ? Padding(
+                            padding: const EdgeInsets.all(4.0),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(16),
+                              child: state.allUser?[index].avatarUrl == ''
+                                  ? Image.network(
+                                      'https://i.bloganchoi.com/bloganchoi.com/wp-content/uploads/2019/11/dich-le-nhiet-ba-0-696x435.jpg',
+                                      width: 48,
+                                      height: 48,
+                                      fit: BoxFit.cover,
+                                    )
+                                  : Image.network(
+                                      state.allUser?[index].avatarUrl ?? '',
+                                      width: 48,
+                                      height: 48,
+                                      fit: BoxFit.cover,
+                                    ),
+                            ),
+                          )
+                        : GradientOutline(
+                            strokeWidth: 3,
+                            radius: 18,
+                            gradient: const LinearGradient(
+                              colors: [
+                                AppColors.startGradient,
+                                AppColors.endGradient
+                              ],
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(4.0),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(16),
+                                child: state.allUser?[index].avatarUrl == ''
+                                    ? Image.network(
+                                        'https://i.bloganchoi.com/bloganchoi.com/wp-content/uploads/2019/11/dich-le-nhiet-ba-0-696x435.jpg',
+                                        width: 48,
+                                        height: 48,
+                                        fit: BoxFit.cover,
+                                      )
+                                    : Image.network(
+                                        state.allUser?[index].avatarUrl ?? '',
+                                        width: 48,
+                                        height: 48,
+                                        fit: BoxFit.cover,
+                                      ),
+                              ),
+                            ),
+                            onPressed: () {
+                              print('see story');
+                            },
+                          ),
                   ),
-                  Container(
-                    alignment: Alignment.topRight,
-                    height: 56,
-                    width: 56,
-                    child: Container(
-                      height: 14,
-                      width: 14,
-                      decoration: BoxDecoration(
-                        color: AppColors.onlineGreen,
-                        border: Border.all(
-                          color: AppColors.textWhite,
-                          width: 2,
-                        ),
-                        borderRadius: BorderRadius.circular(7),
-                      ),
-                    ),
-                  ),
+                  state.allUser?[index].isOnline ?? false
+                      ? Container(
+                          alignment: Alignment.topRight,
+                          height: 56,
+                          width: 56,
+                          child: Container(
+                            height: 14,
+                            width: 14,
+                            decoration: BoxDecoration(
+                              color: AppColors.onlineGreen,
+                              border: Border.all(
+                                color: AppColors.textWhite,
+                                width: 2,
+                              ),
+                              borderRadius: BorderRadius.circular(7),
+                            ),
+                          ),
+                        )
+                      : const SizedBox(),
                 ],
               ),
               const SizedBox(width: 12),
-              Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    "${state.allUser?[index].firstName} ${state.allUser?[index].lastName}" ??
-                        '',
-                    style: AppTextStyle.blackS14SemiBold,
-                  ),
-                  const SizedBox(height: 5),
-                  Text(
-                    'Last seen yesterday',
-                    style: AppTextStyle.greyS12,
-                  )
-                ],
+              GestureDetector(
+                onTap: () {
+                  var parameters = <String, String>{
+                    "id": state.allUser?[index].id ?? '',
+                    "name": '${state.allUser?[index].firstName}' +
+                        ' ' +
+                        '${state.allUser?[index].lastName}',
+                  };
+                  print('come get.to - $parameters');
+
+                  Get.to(MessagePage(), arguments: parameters);
+                },
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "${state.allUser?[index].firstName} ${state.allUser?[index].lastName}",
+                      style: AppTextStyle.blackS14SemiBold,
+                    ),
+                    const SizedBox(height: 5),
+                    Text(
+                      'Last seen yesterday',
+                      style: AppTextStyle.greyS12,
+                    )
+                  ],
+                ),
               )
             ],
           ),

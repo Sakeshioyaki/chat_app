@@ -70,12 +70,12 @@ class _BuildChillMorePageState extends State<BuildChillMorePage> {
                     borderRadius: BorderRadius.circular(25),
                     child: state.user?.avatarUrl != ''
                         ? Image.network(
-                            'https://i.bloganchoi.com/bloganchoi.com/wp-content/uploads/2019/11/dich-le-nhiet-ba-0-696x435.jpg',
+                            state.user?.avatarUrl ?? '',
                             height: 50,
                             width: 50,
                             fit: BoxFit.cover,
                           )
-                        : Container(
+                        : SizedBox(
                             height: 50,
                             width: 50,
                             child: Center(
@@ -95,9 +95,7 @@ class _BuildChillMorePageState extends State<BuildChillMorePage> {
                       Text(
                         state.user?.lastName == ''
                             ? state.user?.firstName ?? ''
-                            : state.user!.firstName! +
-                                ' ' +
-                                state.user!.lastName!,
+                            : '${state.user!.firstName!} ${state.user!.lastName!}',
                         style: AppTextStyle.blackS14,
                       ),
                       const SizedBox(height: 5),
@@ -373,6 +371,24 @@ class _BuildChillMorePageState extends State<BuildChillMorePage> {
             ],
           ),
         ),
+        const SizedBox(height: 20),
+        GestureDetector(
+          onTap: () {
+            appCubit.signOut();
+          },
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 5),
+            height: 50,
+            width: 327,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+                color: Colors.red, borderRadius: BorderRadius.circular(30)),
+            child: Text(
+              'LogOut',
+              style: AppTextStyle.whiteS16,
+            ),
+          ),
+        )
       ],
     );
   }

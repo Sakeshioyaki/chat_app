@@ -2,11 +2,13 @@ import 'package:chat_app/models/enums/load_status.dart';
 import 'package:chat_app/models/user/user_entity.dart';
 import 'package:chat_app/repositories/auth_repository.dart';
 import 'package:chat_app/repositories/user_repository.dart';
+import 'package:chat_app/ui/pages/splash/splash_page.dart';
 import 'package:chat_app/utils/logger.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:equatable/equatable.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get/get.dart';
 
 part 'app_state.dart';
 
@@ -33,6 +35,10 @@ class AppCubit extends Cubit<AppState> {
     return state.user;
   }
 
+  String? getStory() {
+    return state.user?.haveStory;
+  }
+
   Future<void> updateProfile(
       {String? lastName, required String firstName, String? urlAvatar}) async {
     UserEntity newUser = UserEntity(
@@ -49,21 +55,23 @@ class AppCubit extends Cubit<AppState> {
   ///Sign Out
   void signOut() async {
     emit(state.copyWith(signOutStatus: LoadStatus.loading));
+    print('come logout ');
     try {
       await Future.delayed(const Duration(seconds: 2));
-      // await authRepo.removeToken();
-
-      emit(state.removeUser().copyWith(
-            signOutStatus: LoadStatus.success,
-          ));
-
       DatabaseReference ref =
           FirebaseDatabase.instance.ref("status/${state.user?.id}");
       var isOnlineForFirestore = {
-        "state": 'online',
-        "last_changed": FieldValue.serverTimestamp(),
+        "state": 'offline',
+        "last_changed": FieldValue.serverTimestamp().toString(),
+        "have_story": state.user?.haveStory,
       };
       await ref.update(isOnlineForFirestore);
+      emit(state.copyWith(user: UserEntity()));
+      await authRepo.removeToken();
+      emit(state.removeUser().copyWith(
+            signOutStatus: LoadStatus.success,
+          ));
+      Get.offAll(() => const SplashPage());
     } catch (e) {
       logger.e(e);
       emit(state.copyWith(signOutStatus: LoadStatus.failure));
