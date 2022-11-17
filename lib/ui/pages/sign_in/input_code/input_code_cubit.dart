@@ -107,6 +107,7 @@ class InputCodeCubit extends Cubit<InputCodeState> {
   }
 
   void verifyPhone() async {
+    print('cmome - ${state.phone}');
     if (state.phone == '') {
       AppSnackbar.showError(message: 'Phone is empty');
       return;
@@ -131,7 +132,7 @@ class InputCodeCubit extends Cubit<InputCodeState> {
         print('sang roi dyy');
       },
       codeAutoRetrievalTimeout: (String verificationCode) async {},
-      timeout: const Duration(seconds: 10000),
+      timeout: const Duration(seconds: 100),
     );
     // Get.to(() => InputCodePage());
   }

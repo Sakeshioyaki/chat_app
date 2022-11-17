@@ -170,7 +170,7 @@ class _SignInChildPageState extends State<SignInChildPage> {
               //     builder: (context) => const InputCodePage(state.phone),
               //   ),
               // );
-              Get.to(const InputCodePage(), arguments: ["phone", state.phone]);
+              Get.to(const InputCodePage(), arguments: state.phone);
             },
             isLoading: state.signInStatus == LoadStatus.loading,
           ),

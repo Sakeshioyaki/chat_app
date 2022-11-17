@@ -17,7 +17,7 @@ samples, guidance on mobile development, and a full API reference.
 
 dart pub global activate flutterfire_cli
 export PATH="$PATH":"$HOME/.pub-cache/bin"
-flutterfire configure --project=chatapp-de747
+flutterfire configure --project==newchatapp-841c1
 
 flutter pub run flutter_launcher_icons:main
 

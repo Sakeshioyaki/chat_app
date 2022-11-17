@@ -1,25 +1,30 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class MessageEntity {
-  String? id;
-  String? content;
+  String? senderId;
+  String? idMessage;
+  String? receiveId;
   String? fileUrl;
   Timestamp? timeSend;
   bool? isRead;
+  String? content;
 
   MessageEntity({
-    this.id,
-    this.content,
+    this.senderId,
+    this.idMessage,
+    this.receiveId,
     this.fileUrl,
     this.timeSend,
     this.isRead,
+    this.content,
   });
 
   MessageEntity.fromDocumentSnapshot(
       {required DocumentSnapshot documentSnapshot}) {
-    id = documentSnapshot.id;
-    content = documentSnapshot["content"];
+    senderId = documentSnapshot["senderId"];
+    receiveId = documentSnapshot["receiveId"];
     fileUrl = documentSnapshot["file_url"];
+    content = documentSnapshot["content"];
     timeSend = documentSnapshot["time_send"];
     isRead = documentSnapshot["is_read"];
   }

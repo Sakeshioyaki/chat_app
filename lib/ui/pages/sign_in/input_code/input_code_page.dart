@@ -38,7 +38,6 @@ class BuildChillPage extends StatefulWidget {
 class _BuildChillPageState extends State<BuildChillPage> {
   late TextEditingController textCtrl;
   late InputCodeCubit cubit;
-  String? phone = Get.parameters["phone"];
 
   @override
   void initState() {
@@ -46,7 +45,7 @@ class _BuildChillPageState extends State<BuildChillPage> {
     textCtrl = TextEditingController(text: '');
     print('vao roi kho lam ');
     cubit = BlocProvider.of<InputCodeCubit>(context);
-    cubit.updatePhone(phone: Get.parameters["phone"] ?? '+84962150299');
+    cubit.updatePhone(phone: Get.arguments);
     cubit.verifyPhone();
     // AppSnackbar.showInfo(
     //     message:

@@ -2,12 +2,15 @@ import 'package:chat_app/blocs/app_cubit.dart';
 import 'package:chat_app/common/app_colors.dart';
 import 'package:chat_app/common/app_images.dart';
 import 'package:chat_app/common/app_text_styles.dart';
+import 'package:chat_app/models/enums/load_status.dart';
+import 'package:chat_app/models/message/message_entity.dart';
 import 'package:chat_app/repositories/user_repository.dart';
 import 'package:chat_app/ui/messages/message_cubit.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 
 class MessagePage extends StatelessWidget {
   const MessagePage({Key? key}) : super(key: key);
@@ -38,19 +41,26 @@ class BuildChillMessagePage extends StatefulWidget {
 class _BuildChillMessagePageState extends State<BuildChillMessagePage> {
   late MessageCubit cubit;
   late TextEditingController contentMess;
-  late Stream<QuerySnapshot> myMessage;
-  late Stream<QuerySnapshot> userMessage;
+  late Stream<QuerySnapshot> streamMessage;
+  ScrollController controller = ScrollController();
 
   @override
   void initState() {
+    super.initState();
     cubit = BlocProvider.of<MessageCubit>(context);
     cubit.setUserId(
         id: Get.arguments["id"] ?? '', name: Get.arguments["name"] ?? '');
     contentMess = TextEditingController();
-    cubit.getMessages();
-    myMessage = cubit.listenMyMessage();
-    userMessage = cubit.listenFriendMessage();
-    super.initState();
+    cubit.getMessage();
+    streamMessage = cubit.listenMessage();
+    streamMessage.listen((event) {
+      cubit.updateMessage(event);
+      controller.animateTo(
+        controller.position.maxScrollExtent,
+        duration: const Duration(milliseconds: 500),
+        curve: Curves.easeOut,
+      );
+    });
   }
 
   @override
@@ -58,215 +68,138 @@ class _BuildChillMessagePageState extends State<BuildChillMessagePage> {
     return BlocBuilder<MessageCubit, MessageState>(
       bloc: cubit,
       builder: (context, state) {
-        return Scaffold(
-          appBar: AppBar(
-            backgroundColor: Colors.white,
-            leadingWidth: 50,
-            leading: GestureDetector(
-              onTap: () {
-                Get.back();
-              },
-              child: Icon(
-                Icons.arrow_back_ios,
-                size: 12,
-                color: Colors.black,
+        if (state.loadData == LoadStatus.failure) {
+          return const Text('faild to load');
+        } else if (state.loadData == LoadStatus.loading) {
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        } else {
+          return Scaffold(
+            appBar: AppBar(
+              backgroundColor: Colors.white,
+              leadingWidth: 50,
+              leading: GestureDetector(
+                onTap: () {
+                  Get.back();
+                },
+                child: const Icon(
+                  Icons.arrow_back_ios,
+                  size: 12,
+                  color: Colors.black,
+                ),
               ),
+              titleSpacing: 0,
+              title: Text(
+                state.name ?? '',
+              ),
+              titleTextStyle: AppTextStyle.blackS18,
+              centerTitle: false,
+              actions: [
+                Image.asset(
+                  AppImages.icBlackSearch,
+                  width: 17,
+                ),
+                const SizedBox(width: 16),
+                Image.asset(
+                  AppImages.icMenu,
+                  width: 18,
+                ),
+                const SizedBox(width: 20)
+              ],
             ),
-            titleSpacing: 0,
-            title: Text(
-              state.name ?? '',
-            ),
-            titleTextStyle: AppTextStyle.blackS18,
-            centerTitle: false,
-            actions: [
-              Image.asset(
-                AppImages.icBlackSearch,
-                width: 17,
-              ),
-              const SizedBox(width: 16),
-              Image.asset(
-                AppImages.icMenu,
-                width: 18,
-              ),
-              const SizedBox(width: 20)
-            ],
-          ),
-          body: StreamBuilder<QuerySnapshot>(
-            stream: userMessage,
-            builder:
-                (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-              return StreamBuilder<QuerySnapshot>(
-                  stream: myMessage,
-                  builder: (context, snapshot) {
-                    return SafeArea(
-                      child: Column(
-                        children: [
-                          Expanded(
-                            child: Container(
-                              color: AppColors.textFieldBackground,
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 16),
-                              child: snapshot.hasData
-                                  ? ListView.builder(
-                                      itemCount: snapshot.data?.docs.length,
-                                      itemBuilder: (context, index) {
-                                        print(snapshot.data?.docs[index]
-                                            ['content']);
-                                        return Text(snapshot.data?.docs[index]
-                                            ['content']);
-                                      },
-                                    )
-                                  : Container(),
-                            ),
-                          ),
-                          Container(
-                            height: 56,
-                            padding: const EdgeInsets.symmetric(horizontal: 12),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              children: [
-                                const Icon(
-                                  Icons.add,
-                                  size: 24,
-                                  color: AppColors.gray,
-                                ),
-                                const SizedBox(width: 10),
-                                Expanded(
-                                  child: TextField(
-                                    textAlignVertical: TextAlignVertical.bottom,
-                                    decoration: InputDecoration(
-                                      filled: true,
-                                      border: InputBorder.none,
-                                      constraints: const BoxConstraints(
-                                          minHeight: 36, maxHeight: 36),
-                                      enabledBorder: const OutlineInputBorder(
-                                        borderSide: BorderSide(
-                                            color: Colors.transparent),
-                                        borderRadius: BorderRadius.all(
-                                          Radius.circular(4.0),
-                                        ),
-                                      ),
-                                      fillColor: AppColors.textFieldBackground,
-                                      hintText: 'Write something',
-                                      hintStyle: AppTextStyle.greyS14,
-                                      helperStyle: AppTextStyle.greyS14,
-                                      alignLabelWithHint: false,
-                                    ),
-                                    style: AppTextStyle.blackS14,
-                                    controller: contentMess,
-                                    onChanged: (String value) => {
-                                      print("value - $value"),
-                                      cubit.setMessage(value)
-                                    },
-                                    onSubmitted: (String value) {
-                                      print("submmitt $value");
-                                      cubit.sendMess();
-                                    },
-                                  ),
-                                ),
-                                const SizedBox(width: 10),
-                                TextButton(
-                                  onPressed: () {
-                                    print("onpress - ${state.content}");
-                                    cubit.sendMess();
-                                  },
-                                  child: Image.asset(
-                                    AppImages.icSend,
-                                    width: 18,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
+            body: SafeArea(
+              child: Column(
+                children: [
+                  Expanded(
+                    child: Container(
+                      color: AppColors.textFieldBackground,
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: ListView.builder(
+                        // reverse: true,
+                        controller: controller,
+                        itemCount: state.messageList.length,
+                        itemBuilder: (context, index) {
+                          // print(snapshot.data?.docs[index]['content']);
+                          print(
+                              "this is id ${state.messageList[index].senderId} - ${state.myId}");
+                          return state.messageList[index].senderId == state.myId
+                              ? buildMyChatItem(state.messageList[index])
+                              : buildFriendChatItem(state.messageList[index]);
+                        },
                       ),
-                    );
-                  });
-            },
-          ),
-        );
+                    ),
+                  ),
+                  Container(
+                    height: 56,
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        const Icon(
+                          Icons.add,
+                          size: 24,
+                          color: AppColors.gray,
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: TextField(
+                            textAlignVertical: TextAlignVertical.bottom,
+                            decoration: InputDecoration(
+                              filled: true,
+                              border: InputBorder.none,
+                              constraints: const BoxConstraints(
+                                  minHeight: 36, maxHeight: 36),
+                              enabledBorder: const OutlineInputBorder(
+                                borderSide:
+                                    BorderSide(color: Colors.transparent),
+                                borderRadius: BorderRadius.all(
+                                  Radius.circular(4.0),
+                                ),
+                              ),
+                              fillColor: AppColors.textFieldBackground,
+                              hintText: 'Write something',
+                              hintStyle: AppTextStyle.greyS14,
+                              helperStyle: AppTextStyle.greyS14,
+                              alignLabelWithHint: false,
+                            ),
+                            style: AppTextStyle.blackS14,
+                            controller: contentMess,
+                            onChanged: (String value) => {
+                              print("value - $value"),
+                              cubit.setMessage(value)
+                            },
+                            onSubmitted: (String value) {
+                              print("submmitt $value");
+                              cubit.sendMess();
+                              contentMess.clear();
+                            },
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        TextButton(
+                          onPressed: () {
+                            print("onpress - ${state.content}");
+                            cubit.sendMess();
+                          },
+                          child: Image.asset(
+                            AppImages.icSend,
+                            width: 18,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
       },
     );
   }
 
-  // SafeArea(
-  // child: Column(
-  // children: [
-  // Expanded(
-  // child: Container(
-  // color: AppColors.textFieldBackground,
-  // padding: const EdgeInsets.symmetric(horizontal: 16),
-  // child: ListView.builder(
-  // itemCount: 10,
-  // itemBuilder: (BuildContext context, int index) {
-  // return buildMyChatItem();
-  // },
-  // ),
-  // ),
-  // ),
-  // Container(
-  // height: 56,
-  // padding: const EdgeInsets.symmetric(horizontal: 12),
-  // child: Row(
-  // mainAxisAlignment: MainAxisAlignment.start,
-  // children: [
-  // const Icon(
-  // Icons.add,
-  // size: 24,
-  // color: AppColors.gray,
-  // ),
-  // const SizedBox(width: 10),
-  // Expanded(
-  // child: TextField(
-  // textAlignVertical: TextAlignVertical.bottom,
-  // decoration: InputDecoration(
-  // filled: true,
-  // border: InputBorder.none,
-  // constraints: const BoxConstraints(
-  // minHeight: 36, maxHeight: 36),
-  // enabledBorder: const OutlineInputBorder(
-  // borderSide: BorderSide(color: Colors.transparent),
-  // borderRadius: BorderRadius.all(
-  // Radius.circular(4.0),
-  // ),
-  // ),
-  // fillColor: AppColors.textFieldBackground,
-  // hintText: 'Write something',
-  // hintStyle: AppTextStyle.greyS14,
-  // helperStyle: AppTextStyle.greyS14,
-  // alignLabelWithHint: false,
-  // ),
-  // style: AppTextStyle.blackS14,
-  // controller: contentMess,
-  // onChanged: (String value) => {
-  // print("value - $value"),
-  // cubit.setMessage(value)
-  // },
-  // onSubmitted: (String value) {
-  // print("submmitt $value");
-  // cubit.sendMess();
-  // },
-  // ),
-  // ),
-  // const SizedBox(width: 10),
-  // TextButton(
-  // onPressed: () {
-  // print("onpress - ${state.content}");
-  // cubit.sendMess();
-  // },
-  // child: Image.asset(
-  // AppImages.icSend,
-  // width: 18,
-  // ),
-  // ),
-  // ],
-  // ),
-  // ),
-  // ],
-  // ),
-  // )
-
-  Widget buildChatItem() {
+  Widget buildFriendChatItem(MessageEntity mess) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -287,13 +220,14 @@ class _BuildChillMessagePageState extends State<BuildChillMessagePage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Good morning, did you sleep well? dddddddddddddding, did you sleep well? dddddddddddddding, did you sleep well?dddddddddddddding, did you sleep well?ddddddddddddddd',
+                mess.content ?? '',
                 style: AppTextStyle.blackS14,
                 textAlign: TextAlign.start,
               ),
               const SizedBox(height: 5),
               Text(
-                '09:45',
+                DateFormat('h:mm a')
+                    .format(mess.timeSend?.toDate() ?? DateTime.now()),
                 style: AppTextStyle.greyS10,
               ),
             ],
@@ -304,7 +238,7 @@ class _BuildChillMessagePageState extends State<BuildChillMessagePage> {
     );
   }
 
-  Widget buildMyChatItem() {
+  Widget buildMyChatItem(MessageEntity mess) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
@@ -325,13 +259,14 @@ class _BuildChillMessagePageState extends State<BuildChillMessagePage> {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text(
-                'Good morning, did you sleep well?dddddddddddddding, did you sleep well?dddddddddddddding, did you sleep well?dddddddddddddding, did you sleep well?ddddddddddddddd',
+                mess.content ?? '',
                 style: AppTextStyle.whiteS14,
                 textAlign: TextAlign.start,
               ),
               const SizedBox(height: 5),
               Text(
-                '09:45. ${'Read'}',
+                DateFormat('h:mm a')
+                    .format(mess.timeSend?.toDate() ?? DateTime.now()),
                 style: AppTextStyle.whiteS10,
               ),
             ],
