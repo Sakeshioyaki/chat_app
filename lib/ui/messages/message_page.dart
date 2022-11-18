@@ -116,11 +116,9 @@ class _BuildChillMessagePageState extends State<BuildChillMessagePage> {
                       color: AppColors.textFieldBackground,
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       child: ListView.builder(
-                        // reverse: true,
                         controller: controller,
                         itemCount: state.messageList.length,
                         itemBuilder: (context, index) {
-                          // print(snapshot.data?.docs[index]['content']);
                           print(
                               "this is id ${state.messageList[index].senderId} - ${state.myId}");
                           return state.messageList[index].senderId == state.myId
@@ -165,12 +163,9 @@ class _BuildChillMessagePageState extends State<BuildChillMessagePage> {
                             ),
                             style: AppTextStyle.blackS14,
                             controller: contentMess,
-                            onChanged: (String value) => {
-                              print("value - $value"),
-                              cubit.setMessage(value)
-                            },
+                            onChanged: (String value) =>
+                                {cubit.setMessage(value)},
                             onSubmitted: (String value) {
-                              print("submmitt $value");
                               cubit.sendMess();
                               contentMess.clear();
                             },
@@ -179,7 +174,6 @@ class _BuildChillMessagePageState extends State<BuildChillMessagePage> {
                         const SizedBox(width: 10),
                         TextButton(
                           onPressed: () {
-                            print("onpress - ${state.content}");
                             cubit.sendMess();
                           },
                           child: Image.asset(
