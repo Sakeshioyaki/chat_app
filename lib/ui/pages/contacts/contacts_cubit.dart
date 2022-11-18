@@ -1,4 +1,3 @@
-import 'package:bloc/bloc.dart';
 import 'package:chat_app/blocs/app_cubit.dart';
 import 'package:chat_app/models/enums/load_status.dart';
 import 'package:chat_app/models/user/user_entity.dart';
@@ -6,7 +5,7 @@ import 'package:chat_app/repositories/user_repository.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:equatable/equatable.dart';
 import 'package:firebase_database/firebase_database.dart';
-import 'package:intl/intl.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 part 'contacts_state.dart';
 
@@ -29,17 +28,15 @@ class ContactsCubit extends Cubit<ContactsState> {
 
     DatabaseReference statusUser = FirebaseDatabase.instance.ref('status');
     var dataStatus = await statusUser.get();
-    allUser.forEach((e) {
+    for (var e in allUser) {
       e.isOnline =
           dataStatus.child('${e.id}/state').value == 'online' ? true : false;
-      print(
-          'dang doc status ${dataStatus.child('${e.id}/state').value.toString()}');
+
       e.lastChanged = Timestamp.fromDate(DateTime.parse(
           dataStatus.child('${e.id}/last_changed').value.toString()));
-      print(
-          'dang doc last_changed ${dataStatus.child('${e.id}/last_changed').value}');
+
       e.haveStory = dataStatus.child('${e.id}/have_story').value as String?;
-    });
+    }
     emit(state.copyWith(allUser: allUser, loadUser: LoadStatus.success));
   }
 
@@ -62,17 +59,14 @@ class ContactsCubit extends Cubit<ContactsState> {
 
   String readTimestamp(int timestamp) {
     var now = DateTime.now();
-    var format = DateFormat('HH:mm a');
     DateTime date = DateTime.fromMillisecondsSinceEpoch(timestamp);
     var diff = now.difference(date);
-    print('diff - ${diff.inSeconds}');
     var time = '';
 
     if (diff.inSeconds <= 0 ||
         diff.inSeconds > 0 && diff.inMinutes == 0 ||
         diff.inMinutes > 0 && diff.inHours == 0 ||
         diff.inHours > 0 && diff.inDays == 0) {
-      // time = format.format(date);
       if (diff.inHours > 0) {
         time = '${diff.inHours} hours ago';
       } else {
@@ -82,7 +76,6 @@ class ContactsCubit extends Cubit<ContactsState> {
           time = '${diff.inSeconds} seconds ago';
         }
       }
-      print('diff - time1 ${time.toString()}');
     } else if (diff.inDays > 0 && diff.inDays < 7) {
       if (diff.inDays == 1) {
         time = '${diff.inDays} day ago';

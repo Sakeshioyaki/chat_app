@@ -70,14 +70,14 @@ class _SignInChildPageState extends State<SignInChildPage> {
         shadowColor: Colors.transparent,
         backgroundColor: Colors.transparent,
         bottom: PreferredSize(
-            preferredSize: const Size.fromHeight(2.0),
-            child: Container(
-              color: Colors.transparent,
-            )),
+          preferredSize: const Size.fromHeight(2.0),
+          child: Container(
+            color: Colors.transparent,
+          ),
+        ),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
-          // reverse: true,
           padding: const EdgeInsets.only(top: 80),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -97,54 +97,53 @@ class _SignInChildPageState extends State<SignInChildPage> {
                 ),
               ),
               const SizedBox(height: 48),
-              BlocBuilder<SignInCubit, SignInState>(builder: (context, state) {
-                return Container(
-                  height: 36,
-                  padding: const EdgeInsets.symmetric(horizontal: 24),
-                  child: IntlPhoneField(
-                    dropdownTextStyle: AppTextStyle.greyS14,
-                    showDropdownIcon: false,
-                    decoration: InputDecoration(
-                      hintText: 'Phone Number',
-                      // labelText: '962150299',
-                      hintStyle: AppTextStyle.greyS14,
-                      filled: true,
-                      border: OutlineInputBorder(
+              BlocBuilder<SignInCubit, SignInState>(
+                builder: (context, state) {
+                  return Container(
+                    height: 36,
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    child: IntlPhoneField(
+                      dropdownTextStyle: AppTextStyle.greyS14,
+                      showDropdownIcon: false,
+                      decoration: InputDecoration(
+                        hintText: 'Phone Number',
+                        hintStyle: AppTextStyle.greyS14,
+                        filled: true,
+                        border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(4.0),
-                          borderSide: BorderSide.none),
-                      fillColor: AppColors.textFieldBackground,
-                      contentPadding: const EdgeInsets.symmetric(
-                        vertical: 10,
-                        horizontal: 10,
+                          borderSide: BorderSide.none,
+                        ),
+                        fillColor: AppColors.textFieldBackground,
+                        contentPadding: const EdgeInsets.symmetric(
+                          vertical: 10,
+                          horizontal: 10,
+                        ),
                       ),
-                    ),
-                    initialCountryCode: 'VN',
-                    disableLengthCheck: true,
-                    onChanged: (phone) {
-                      cubit.changePhone(phone: phone.completeNumber);
-                      print(phone);
-                    },
-                    keyboardType: TextInputType.number,
-                    // keyboardAppearance:,
-                    inputFormatters: [
-                      FilteringTextInputFormatter.allow(RegExp('[0-9.,]')),
-                    ],
-                    validator: (value) {
-                      {
-                        String pattern = r'(^[0-9]{9,10}$)';
-                        RegExp regExp = RegExp(pattern);
-                        if (value!.number.isEmpty) {
-                          return 'Please enter mobile number';
-                        } else if (!regExp.hasMatch(value!.number)) {
-                          print('${value!.number}');
-                          return 'Please enter valid mobile number';
+                      initialCountryCode: 'VN',
+                      disableLengthCheck: true,
+                      onChanged: (phone) {
+                        cubit.changePhone(phone: phone.completeNumber);
+                      },
+                      keyboardType: TextInputType.number,
+                      inputFormatters: [
+                        FilteringTextInputFormatter.allow(RegExp('[0-9.,]')),
+                      ],
+                      validator: (value) {
+                        {
+                          String pattern = r'(^[0-9]{9,10}$)';
+                          RegExp regExp = RegExp(pattern);
+                          if (value!.number.isEmpty) {
+                            return 'Please enter mobile number';
+                          } else if (!regExp.hasMatch(value.number)) {
+                            return 'Please enter valid mobile number';
+                          }
+                          return null;
                         }
-                        return null;
-                      }
-                    },
-                  ),
-                );
-              }),
+                      },
+                    ),
+                  );
+                },
+              ),
               const SizedBox(height: 80),
               _buildSignButton(),
             ],
@@ -162,14 +161,6 @@ class _SignInChildPageState extends State<SignInChildPage> {
           child: AppTintButton(
             title: 'Continue',
             onPressed: () {
-              // Get.toNamed("/inputCode/:${state.phone}");
-              // cubit.verifyPhone();
-              // Navigator.push(
-              //   context,
-              //   MaterialPageRoute(
-              //     builder: (context) => const InputCodePage(state.phone),
-              //   ),
-              // );
               Get.to(const InputCodePage(), arguments: state.phone);
             },
             isLoading: state.signInStatus == LoadStatus.loading,

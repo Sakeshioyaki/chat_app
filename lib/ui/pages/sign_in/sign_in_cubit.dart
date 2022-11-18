@@ -7,13 +7,6 @@ part 'sign_in_state.dart';
 class SignInCubit extends Cubit<SignInState> {
   SignInCubit() : super(const SignInState());
 
-  // void changeUserProfile({
-  //   required String firstName,
-  //   String? lastName,
-  // }) {
-  //   emit(state.copyWith(firstName: firstName, lastName: lastName));
-  // }
-
   void changePhone({
     required String phone,
   }) {

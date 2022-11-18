@@ -114,8 +114,7 @@ class _ContactsChillPageState extends State<ContactsChillPage> {
                 itemBuilder: (BuildContext context, int index) {
                   return GestureDetector(
                     onTap: () {
-                      print('see chat');
-                      Get.to(() => MessagePage());
+                      Get.to(() => const MessagePage());
                     },
                     child: buildContactItem(index),
                   );
