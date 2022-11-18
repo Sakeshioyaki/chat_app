@@ -1,10 +1,14 @@
+import 'package:chat_app/blocs/app_cubit.dart';
 import 'package:chat_app/common/app_colors.dart';
 import 'package:chat_app/common/app_images.dart';
 import 'package:chat_app/common/app_text_styles.dart';
+import 'package:chat_app/models/enums/load_status.dart';
 import 'package:chat_app/repositories/user_repository.dart';
 import 'package:chat_app/ui/messages/message_page.dart';
 import 'package:chat_app/ui/pages/contacts/contacts_cubit.dart';
 import 'package:chat_app/ui/widgets/gradien_container/gradien_container.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
@@ -17,7 +21,8 @@ class ContactsPage extends StatelessWidget {
     return BlocProvider(
       create: (con) {
         final userRepo = RepositoryProvider.of<UserRepository>(context);
-        return ContactsCubit(userRepo: userRepo);
+        final appCubit = RepositoryProvider.of<AppCubit>(context);
+        return ContactsCubit(userRepo: userRepo, appCubit: appCubit);
       },
       child: const ContactsChillPage(),
     );
@@ -33,11 +38,16 @@ class ContactsChillPage extends StatefulWidget {
 
 class _ContactsChillPageState extends State<ContactsChillPage> {
   late ContactsCubit cubit;
+  late Stream<DatabaseEvent> streamStatus;
 
   @override
   void initState() {
     cubit = BlocProvider.of<ContactsCubit>(context);
     cubit.getAllUser();
+    streamStatus = cubit.listenOnlineStatus();
+    streamStatus.listen((DatabaseEvent event) {
+      cubit.updateStatus(event);
+    });
     super.initState();
   }
 
@@ -87,31 +97,39 @@ class _ContactsChillPageState extends State<ContactsChillPage> {
   Widget buildListContacts() {
     return BlocBuilder<ContactsCubit, ContactsState>(
       builder: (context, state) {
-        return Expanded(
-          child: RefreshIndicator(
-            onRefresh: () async {
-              cubit.getAllUser();
-            },
-            child: ListView.separated(
-              itemCount: state.allUser?.length ?? 0,
-              itemBuilder: (BuildContext context, int index) {
-                return GestureDetector(
-                  onTap: () {
-                    print('see chat');
-                    Get.to(() => MessagePage());
-                  },
-                  child: buildContactItem(index),
-                );
+        if (state.loadUser == LoadStatus.failure) {
+          return const Text('faild to load');
+        } else if (state.loadUser == LoadStatus.loading) {
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        } else {
+          return Expanded(
+            child: RefreshIndicator(
+              onRefresh: () async {
+                cubit.getAllUser();
               },
-              separatorBuilder: (BuildContext context, int index) {
-                return const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 24),
-                  child: Divider(),
-                );
-              },
+              child: ListView.separated(
+                itemCount: state.allUser?.length ?? 0,
+                itemBuilder: (BuildContext context, int index) {
+                  return GestureDetector(
+                    onTap: () {
+                      print('see chat');
+                      Get.to(() => MessagePage());
+                    },
+                    child: buildContactItem(index),
+                  );
+                },
+                separatorBuilder: (BuildContext context, int index) {
+                  return const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 24),
+                    child: Divider(),
+                  );
+                },
+              ),
             ),
-          ),
-        );
+          );
+        }
       },
     );
   }
@@ -207,13 +225,10 @@ class _ContactsChillPageState extends State<ContactsChillPage> {
                 onTap: () {
                   var parameters = <String, String>{
                     "id": state.allUser?[index].id ?? '',
-                    "name": '${state.allUser?[index].firstName}' +
-                        ' ' +
-                        '${state.allUser?[index].lastName}',
+                    "name":
+                        '${state.allUser?[index].firstName} ${state.allUser?[index].lastName}',
                   };
-                  print('come get.to - $parameters');
-
-                  Get.to(MessagePage(), arguments: parameters);
+                  Get.to(const MessagePage(), arguments: parameters);
                 },
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -224,10 +239,12 @@ class _ContactsChillPageState extends State<ContactsChillPage> {
                       style: AppTextStyle.blackS14SemiBold,
                     ),
                     const SizedBox(height: 5),
-                    Text(
-                      'Last seen yesterday',
-                      style: AppTextStyle.greyS12,
-                    )
+                    state.allUser?[index].isOnline ?? false
+                        ? const SizedBox()
+                        : Text(
+                            "Online ${(cubit.readTimestamp(state.allUser?[index].lastChanged?.millisecondsSinceEpoch ?? Timestamp.now().millisecondsSinceEpoch))}",
+                            style: AppTextStyle.greyS12,
+                          )
                   ],
                 ),
               )

@@ -62,7 +62,7 @@ class AppCubit extends Cubit<AppState> {
           FirebaseDatabase.instance.ref("status/${state.user?.id}");
       var isOnlineForFirestore = {
         "state": 'offline',
-        "last_changed": FieldValue.serverTimestamp().toString(),
+        "last_changed": Timestamp.now().toDate().toString(),
         "have_story": state.user?.haveStory,
       };
       await ref.update(isOnlineForFirestore);

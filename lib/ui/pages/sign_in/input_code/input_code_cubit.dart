@@ -89,7 +89,7 @@ class InputCodeCubit extends Cubit<InputCodeState> {
               FirebaseDatabase.instance.ref("status/${result.user?.uid}");
           var isOnlineForFirestore = {
             "state": 'online',
-            "last_changed": Timestamp.fromDate(DateTime.now()).toString(),
+            "last_changed": Timestamp.now().toDate().toString(),
             "have_story": story,
           };
           await ref.update(isOnlineForFirestore);
@@ -98,7 +98,6 @@ class InputCodeCubit extends Cubit<InputCodeState> {
         }
       } else {
         emit(state.copyWith(loadStatus: LoadStatus.failure));
-        // Get.offNamed(RouteConfig.inputCode);
       }
     } catch (error) {
       logger.e(error);
@@ -107,7 +106,6 @@ class InputCodeCubit extends Cubit<InputCodeState> {
   }
 
   void verifyPhone() async {
-    print('cmome - ${state.phone}');
     if (state.phone == '') {
       AppSnackbar.showError(message: 'Phone is empty');
       return;
